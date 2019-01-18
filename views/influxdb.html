@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <div>
+            起始时间<input type="text" id="start">
+        </div>
+        <div>
+            结束时间<input type="text" id="end">
+        </div>
+        <div>
+            key <input type="text" name="" id="key">
+        </div>
+        <div>
+            <button onclick="loadChar()">查询</button>
+        </div>
+    </div>
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script src="../static/js/echarts.js"></script>
+    <script src="https://upcdn.b0.upaiyun.com/libs/jquery/jquery-2.0.2.min.js"></script>
+    <script>
+
+        function loadChar(){
+            var start=$('#start').val();
+            var end=$('#end').val();
+            var key=$('#key').val();
+
+            var json={
+                "t1": start,
+                "t2": end,
+                "tags": {
+                    "key": key
+                }
+            }
+
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('main'));
+
+            $.ajax({
+                url:'http://127.0.0.1:8080/influxdb',
+                type:'POST',
+                dataType:'json',
+                data:JSON.stringify(json),
+                success:function(res){
+                    var data=res.data;
+
+                    var timeList=[];
+
+                    var QualityList=[];
+
+                    var ValueList=[];
+
+                    for(var i=0;i<data.length;i++){
+                        timeList.push(data[i].MapTime);
+
+                        QualityList.push(data[i].Quality);
+
+                        ValueList.push(data[i].Value);
+                    }
+
+                    var option = {
+                        title: {
+                            text: '折线图堆叠'
+                        },
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        legend: {
+                            data:['Quality','Value']
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        toolbox: {
+                            feature: {
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: timeList
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [
+                            {
+                                name:'Quality',
+                                type:'line',
+                                stack: '总量',
+                                data:QualityList
+                            },
+                            {
+                                name:'Value',
+                                type:'line',
+                                stack: '总量',
+                                data:ValueList
+                            }
+                        ]
+                    };
+
+
+                    myChart.setOption(option);
+                }
+            })
+
+            // var res={
+            //     "data": [
+            //         {
+            //             "MapTime": "2019-01-17T16:15:54+08:00",
+            //             "Quality": "0",
+            //             "Value": "49.96"
+            //         },
+            //         {
+            //             "MapTime": "2019-01-18T16:15:54+08:00",
+            //             "Quality": "10",
+            //             "Value": "30.1"
+            //         },
+            //         {
+            //             "MapTime": "2019-01-19T16:15:54+08:00",
+            //             "Quality": "20",
+            //             "Value": "45"
+            //         },
+            //     ],
+            //     "length": 3
+            // }
+
+        }
+
+    </script>
+</body>
+</html>
