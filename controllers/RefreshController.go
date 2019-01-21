@@ -44,6 +44,7 @@ func RefreshInfluxdb() {
 		t := time.Now()
 		err := models.AddInfluxdbData()
 		if err != nil {
+			log.Println(err)
 			return
 		}
 		tt := time.Since(t)
