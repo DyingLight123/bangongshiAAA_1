@@ -38,6 +38,12 @@ func (maps *InfluxdbController) Post() {
 		return
 	}
 
+	if t.Tags["key"] == "" {
+		maps.Data["json"] = map[string]interface{}{"message": "请填写key"}
+		maps.ServeJSON()
+		return
+	}
+
 	result, err := models.GetInfluxdbData(t.T1, t.T2, t.Tags)
 	if err != nil {
 		log.Println(err)
